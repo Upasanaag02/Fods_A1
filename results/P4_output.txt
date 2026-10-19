@@ -1,0 +1,59 @@
+
+==============================================================================
+0. SETUP
+==============================================================================
+sigma^2 = 0.01  ->  beta = 100
+prior precision alpha = 0.05
+polynomial degree = 3  (phi(x) = [1, x, x^2, x^3])
+ridge parameter lambda = alpha/beta = 0.0005
+irreducible-noise band width 2 x 1.96 x beta^-1/2 = 0.3920
+prediction grid: 200 points in [0, 1]
+
+==============================================================================
+1. POSTERIOR AND PREDICTIVE DISTRIBUTION  (p4_train_N10.csv, N = 10)
+==============================================================================
+posterior mean m_N and posterior std of each weight:
+   w[0]: m_N =   +0.0938   std =   0.0868
+   w[1]: m_N =   +7.3679   std =   0.7349
+   w[2]: m_N =  -22.8093   std =   1.7431
+   w[3]: m_N =  +15.2470   std =   1.1481
+
+predictive std s(x):  min = 0.1108 (at x = 0.487),  max = 0.1338 (at x = 1.000)
+noise-only std beta^-1/2 = 0.1000
+95% interval width: min = 0.4343, max = 0.5244
+
+==============================================================================
+2. MAP / RIDGE EQUIVALENCE CHECK
+==============================================================================
+  j        w_MAP          m_N   difference
+  0    +0.093837    +0.093837    -4.74e-14
+  1    +7.367889    +7.367889    +8.59e-13
+  2   -22.809349   -22.809349    -2.33e-12
+  3   +15.247000   +15.247000    +1.58e-12
+
+||w_MAP - m_N||_2             = 2.943e-12
+max |y_MAP(x) - m(x)| on grid = 5.862e-14
+=> the MAP/ridge curve and the Bayesian predictive mean coincide to rounding error.
+
+==============================================================================
+3. EFFECT OF N  (alpha, beta fixed)
+==============================================================================
+   N  mean width  max width  mean phi^T S phi  max phi^T S phi  mean width / floor
+   5      0.4952     0.5494           0.00597          0.00964               1.263
+  10      0.4491     0.5244           0.00314          0.00789               1.146
+  20      0.4242     0.4863           0.00172          0.00539               1.082
+  50      0.4064     0.4417           0.00075          0.00269               1.037
+
+noise floor (irreducible) = 0.3920  (beta^-1 = 0.01 never shrinks with N)
+
+==============================================================================
+4. DISCUSSION (draft for the report)
+==============================================================================
+More data raise the posterior precision S_N^-1 = alpha I + beta Phi^T Phi (each new point adds
+beta phi phi^T), so the posterior covariance S_N shrinks and the parameter-uncertainty term
+phi(x)^T S_N phi(x) falls: the mean of that term drops from 0.0060 at N = 5 to 0.00075 at
+N = 50, and the interval narrows from an average width of 0.495 to 0.406.
+For N = 10 the band is narrowest near x = 0.49 and widest at x = 1.00. The noise term
+beta^-1 = 0.01 is a property of the observations, not of the weights, so it does not depend
+on N: the width can only approach the floor 0.392 and never go below it, however much data
+we collect.
